@@ -1,7 +1,5 @@
 #include "parameters.h"
 #include "vp_type.h"
-#include "sp_type.h"
-
 
 namespace parameters
 { 
@@ -38,7 +36,5 @@ namespace parameters
   long n_ts = (long) duration / time_step + 1;     // the number of steps for real-time propagation
 
   clock_t start_time = clock();     // the time when the code starts to run, for profiling
-
-
 
 }
