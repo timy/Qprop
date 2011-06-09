@@ -1,5 +1,5 @@
 # user defined target name
-TARGET	=	h1s
+TARGET	=	prop
 # the source file needed
 OPTSRC	=	parameters.cc toolbox.cc $(TARGET).cc ../../lib/libqprop.a \
 		../../lib/libutil.a
@@ -26,12 +26,13 @@ clean:
 	rm -f *~
 	rm -f core
 	rm -f screen.log
+	rm -f ../../lib/libutil.a
+
 
 cleanall: clean
 	cd ../core/ && make clean
 	cd ../util/ && make clean
 	rm -f ../../lib/libqprop.a
-	rm -f ../../lib/libutil.a
 
 cleandat:
 	cd ./res && rm -f *.dat

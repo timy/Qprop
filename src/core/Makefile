@@ -11,6 +11,8 @@ FC		= gfortran
 
 all:	$(PACKAGE)
 $(PACKAGE):
+	mkdir -p $(DIROBJ)
+	mkdir -p $(DIRLIB)
 	$(CC) $(COPT) bar.cc -o $(DIROBJ)bar.o
 	$(CC) $(COPT) ylm.cc -o $(DIROBJ)ylm.o
 	$(CC) $(COPT) wavefunction.cc -o $(DIROBJ)wavefunction.o

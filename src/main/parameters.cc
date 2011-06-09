@@ -22,9 +22,8 @@ namespace parameters
 
   double field_duration = T_vecpot::n_c * field_period;    // the total time for field switched on
   
-  //double t0 = 41.7614;    // the starting time for propagation
-  double t0 = 0.0;
-
+  double t0 = 41.7614;    // the starting time for propagation
+  
   double t_end = field_duration;   // the ending time for propagation
 
   double t_field_on = T_vecpot::t_on;    // the starting time of field

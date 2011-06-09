@@ -38,6 +38,14 @@ namespace T_vecpot
     inline const char* get_type() { return "vecpot::sin2"; }
     static double vpot_( double time, int me );
   };
+
+  class user : public C_vecpot
+  {
+  public:
+    user( double (*vpot_) ( double, int ) ) : C_vecpot( vpot_ ) {}
+    inline const char* get_type() { return "vecpot::user_defined"; }
+    //    static double vpot_( double time, int me );
+  };
 }
 
 #endif
