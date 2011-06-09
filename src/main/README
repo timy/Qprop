@@ -1,0 +1,77 @@
+
+* Example: Gaussian wave packet in the Coulomb scalar field + linearly polarized light field
+
+** Assuming we have the linearly polarized light field with sin^2 vector potential: 
+   A(t) = -E0 / omega * sin^2( omega * t / ( 2 * Nc ) ) * sin( omega * t + phi )
+   omega = 0.0227817 ( wavelength of 2um )
+   E_0 = -0.0168 ( light intensity I = 1 x 10^13 W/cm^2 )
+   number of cycle Nc = 0.5
+   carrier phase phi = 0
+
+** Assuming we have the Coulomb potential as the scalar potential:
+   V(r) = - charge / r, charge = 1.0
+
+
+* What do we want? 
+
+** We want to analyze the spatial movement of wavepacket in the combined fields
+
+** We will analyze the projection of wave function onto the eigenstate of atomic hydrogen
+
+** We will calculate the energy spectra for total or partial wave after the light is switched off
+
+** or even more, we will analyze the momentum distribution 
+
+
+* How should we do?
+
+** find out the hydrogen 1s state for projection
+*** enter "parameters.cc":
+    r_max = 400;
+    delta_r = 0.1;
+*** enter "Makefile":
+    TARGET	=	h1s
+*** Make and run "h1s", generate the wavefunction file "wf-9.dat" and information file "info-9.dat"
+    note the energy output: it should be -0.5 for the hydrogen in the ground state
+    the following setting in the file "h1s.cc",
+    "  T_sclpot::coulomb spx; "
+    "  toolbox::set_charge( 1.0 );" 
+    is used to correctly calculate the energy.
+
+** generate a gaussian wavepacket
+*** enter "parameters.cc":
+    r_max = 80; 
+    // this is because the gaussian will be expanded with spherical harmonics 
+    // with the coefficient of modified spherical Bessel function, unfortunately for larger r it is
+    // not so easy to get convergent. so we decide to put the wavepacket on a small grid firstly 
+    // then regrid it later.
+    n_l = 60;  
+*** enter "Makefile":
+    TARGET	=	gaussian
+*** Make and run "gaussian", generate the wavefunction file "wf-0.dat" and information file "info-0.dat"
+    note the energy output: for 3D gaussian wavepacket in the free space ( means no potential presented. 
+    In the file "gaussian.cc", we set all the scalar potential to "none" ), the energy should be 3/2 * alpha,
+    which is related to the width of the gaussian wavepacket ( these parameters are predefined in the file
+    util/sp_type.cc, but can be accessed via the class T_sclpot::gaussian )
+
+** real-time propagation in the combined fields
+*** enter "parameters.cc":
+    r_max = 800;
+    // now we need a larger grid for the wavepacket to move and spread
+    t0 = 41.7614
+    // here we want to simulate the process when the electron appear in the space when the 
+    // electric field E(t) reaches maximum (think about Keldysh tunnel ionization), that is 
+    // why we set it to this value.
+*** enter "Makefile":
+     TARGET	=	prop
+*** Make and run "prop"
+    this would be a long run. the program will read in the wavefunctions produced by the previous 
+    initialization, and set the hamiltonian to its correct form: coulomb potential + vector potential.
+    Note: the vector potential is shifted so the TDSE solver sees value 0 of vector at time t0, to pre
+    a momentum "kick" to the wavepacket (or say, for Qprop, the momentum of the wavepacket is A(t0) at 
+    time t0. Shift of A(t) has no effects on the electric field, but will affect the initial condition.
+    In this case, after the shift, the "mass center" of the wavepacket will come back; otherwise, it won't).
+    The definition of electric field can be found at util/vp_type.cc.
+     
+** spectral analysis
+   to be continued ...

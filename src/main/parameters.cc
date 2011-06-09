@@ -6,7 +6,7 @@ namespace parameters
   //  double r_max = 800.0;
   double r_max = 400.0;
   
-  double delta_r = 0.2;   // step size of radial grid
+  double delta_r = 0.1;   // step size of radial grid
   
   long n_x = (long) round( ( r_max / delta_r ) );     // number of radial grid
 
