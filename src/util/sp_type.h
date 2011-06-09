@@ -2,26 +2,6 @@
 #define SP_TYPE_
 
 #include <cstdlib>
-/*
-namespace sp_type
-{
-  namespace Coulomb
-  {
-    extern double charge;
-    double spot( double, double, double, double, int );
-  }
-
-  namespace helium_atom
-  {
-    double spot( double, double, double, double, int );
-  }
-
-  namespace none
-  {
-    double spot( double, double, double, double, int );
-  }
-}
-*/
 
 class C_sclpot
 {
@@ -53,11 +33,11 @@ namespace T_sclpot
     static double charge;
   };
 
-  class helium : public C_sclpot
+  class Ar_1s : public C_sclpot
   {
   public:
-    helium() : C_sclpot( spot_ ), charge( 2.0 ) {}
-    inline const char* get_type() { return "sclpot::helium"; }
+    Ar_1s() : C_sclpot( spot_ ), charge( 2.0 ) {}
+    inline const char* get_type() { return "sclpot::Ar_1s"; }
     static double spot_( double, double, double, double, int );
     double charge;
   };

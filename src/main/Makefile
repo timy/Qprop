@@ -12,6 +12,7 @@ OPTINC	=	-I. -I../core -I../util
 OPTLIB	=	-lgfortran -llapack
 
 all: libqprop.a $(TARGET)
+	mkdir -p res
 
 $(TARGET) : libqprop.a libutil.a $(TARGET).cc
 	$(CC) $(COPTS) -o $(TARGET) $(OPTSRC) $(OPTINC) $(OPTLIB)

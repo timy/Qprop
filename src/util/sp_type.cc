@@ -1,46 +1,6 @@
 #include "sp_type.h"
 #include <cmath>
 
-/*
-namespace sp_type
-{
-  namespace Coulomb
-  {
-    double charge = 1.0;
-
-    void set_charge( double charge_ )
-    {
-      charge = charge_;
-      return;
-    }
-
-    double spot( double x, double y, double z, double time, int me )
-    {
-      double result = - charge / x;
-      return result;
-    }
-  }
-
-  namespace helium_atom
-  {
-    double spot( double x, double y, double z, double time, int me )
-    {
-      return -17.0 * exp( -17.43 * x ) / x;
-    }
-  }
-
-  namespace none
-  {
-    double spot( double x, double y, double z, double time, int me )
-    {
-      return 0.0;
-    }
-  }
-
-}
-
-*/
-
 namespace T_sclpot
 {
 
@@ -54,7 +14,7 @@ namespace T_sclpot
     return - charge / x;     
   }
 
-  double helium::spot_( double x, double y, double z, double time, int me ) {
-    return - 17.0 * exp( -17.43 * x ) / x;
+  double Ar_1s::spot_( double x, double y, double z, double time, int me ) {
+    return ( - 1.0 / x - 17.0 * exp( -17.43 * x ) / x );
   }
 }
