@@ -509,13 +509,13 @@ namespace toolbox
   {
     double gamma = 0.5 * ( E_1 - E_0 ) / ( n_E - 1.0 );
     double d_E = 2.0 * gamma;
-
+    
     FILE *file_spec = NULL;
     char cstr_fname_wf[40], cstr_fname_info[40], cstr_fname_spec[40];
     sprintf( cstr_fname_wf, "./res/wf-%d.dat", tag );
     sprintf( cstr_fname_info, "./res/info-%d.dat", tag );
     sprintf( cstr_fname_spec, "./res/spec-%d.dat", tag );
-
+    
     export_log( file_log_tag, false );
     fprintf( file_log, "LOG File for Window Operator Spectral Analysis\n\n" );
     fprintf( file_log, "input wave function file: %s\n", cstr_fname_wf );
@@ -525,7 +525,7 @@ namespace toolbox
     fprintf( stdout, "input wave function file: %s\n", cstr_fname_wf );
     fprintf( stdout, "input info file:          %s\n", cstr_fname_info );
     fprintf( stdout, "output spectra file:      %s\n", cstr_fname_spec );
-
+    
     fprintf( file_log, "[E_0, E_1] = [%lf, %lf]\n", E_0, E_1 );
     fprintf( file_log, "n_energy = %ld, n_angle = %ld\n", n_E, n_a );
     fprintf( file_log, "gamma = %lf\n", gamma );
@@ -551,7 +551,7 @@ namespace toolbox
     wavefunction staticpot;
     T_imgpot::none ipot;
     init_hamilton( g, H, staticpot, vpx, vpy, vpz, spx, spy, spz, field, ipot );
-
+    
     complex P_total, s;
     wavefunction wf_lsub, fullchi;
     double *angle = new double[n_a];
@@ -560,11 +560,11 @@ namespace toolbox
     for( long i_a = 0; i_a < n_a; i_a ++ ) {
       angle[i_a] = i_a * M_PI / n_a;
     }
-
+    
     long index;
     wf_lsub.init( g.ngps_y() );
     fullchi.init( g.ngps_x()*g.ngps_y() );
-
+    
     // construct coefficient array for spherical harmonics
     for( long i_l = 0; i_l < g.ngps_y(); i_l ++ ) {
       for( long i_a = 0; i_a < n_a; i_a ++ ) {
@@ -572,30 +572,30 @@ namespace toolbox
 	ylm_array[index] = ylm( i_l, 0, angle[i_a], 0.0 );
       }
     }
-
+    
     fluid V_ee_0;
     V_ee_0.init( g.ngps_x() );
-
+    
     double E;
     int iv = 0;
     for( long i_E = 0; i_E < n_E; i_E ++ ) {
       E = E_0 + i_E * d_E;
-
+      
       // write the current energy to the file
       fprintf( file_spec, "%.15le ", E );
-
+      
       // invoke window-operator method to calculate spectra
       winop_fullchi( fullchi, wf_lsub, &P_total, E, gamma, 
 		     staticpot, V_ee_0, parameters::charge, g, wf, iv );
-
+      
       fprintf( stdout, "winop: step %ld for energy %lf: total probability P = %le\n", 
-	      i_E, E, real( P_total ) );
+	       i_E, E, real( P_total ) );
       
       // write the partial wave spectra to file
       for( long i_l = 0; i_l < g.ngps_y(); i_l ++ ) {
 	fprintf( file_spec, "%.15le ", real( wf_lsub[i_l] ) );
       }
-
+      
       // write the total spectrum to file
       fprintf( file_spec, "%.15le ", real( P_total ) );
 
@@ -623,7 +623,7 @@ namespace toolbox
     delete[] ylm_array;
     return 0;
   }
-
+  
 
   void disp_copyright()
   {
