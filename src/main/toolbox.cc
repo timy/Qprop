@@ -1,11 +1,11 @@
 #include "toolbox.h"
 #include "parameters.h"
 #include <ctime>
-#include "ip_type.h"
+#include "ylm.h"
+#include "winop.h"
 
 namespace toolbox
 {
-  double ( *fp_imgpot ) ( long, long, long, double, grid ) = NULL;
   int file_log_tag = 0;
   FILE* file_log = NULL;
 
@@ -96,7 +96,7 @@ namespace toolbox
     fprintf( stdout, "start to read wavefunction from \"%s\"\n", cstr_fname_wf );
     
     export_log( file_log_tag, false );
-    fprintf( file_log, "\nread wavefunction: from file \"%s\"\n", cstr_fname_wf );
+    fprintf( file_log, "\nread wavefunction from file \"%s\"\n", cstr_fname_wf );
 
     FILE* file_wf = fopen(cstr_fname_wf, "r");
     if ( file_wf == NULL ) {
@@ -133,12 +133,6 @@ namespace toolbox
     return 0;
   }
 
-  int set_imgpot( double (*fp_ip) (long, long, long, double, grid) )
-  {
-    fp_imgpot = fp_ip;
-    return 0;
-  }
-
   void set_charge( double charge )
   {
     parameters::charge = charge;
@@ -149,7 +143,7 @@ namespace toolbox
   int init_hamilton( grid &g, hamop &hamilton, wavefunction &staticpot,
 		     C_vecpot &vpx, C_vecpot &vpy, C_vecpot &vpz, 
 		     C_sclpot &spx, C_sclpot &spy, C_sclpot &spz,
-		     C_field &field
+		     C_field &field, C_imgpot &ipot
 		     )
   {
     fprintf( stdout, "vecpot_x is set to %s\n", vpx.get_type() );
@@ -161,6 +155,8 @@ namespace toolbox
     fprintf( stdout, "sclpot_z is set to %s\n", spz.get_type() );
 
     fprintf( stdout, "field    is set to %s\n", field.get_type() );
+
+    fprintf( stdout, "imgpot is set to   %s\n", ipot.get_type() );
 
     export_log( file_log_tag, false );
     fprintf( file_log, "\nHamiltonian Initialization:\n" );
@@ -174,17 +170,13 @@ namespace toolbox
     
     fprintf( file_log, "field    is set to %s\n", field.get_type() );
 
-    if( fp_imgpot == NULL ) {
-      fp_imgpot = ip_type::ipot;
-      fprintf( stdout, "imgpot is set to ip_type::ipot by default\n" );
-      fprintf( file_log, "imgpot is set to ip_type::ipot by default\n" );
-
-    }
+    fprintf( file_log, "imgpot is set to   %s\n", ipot.get_type() );
+    
 
     hamilton.init( g, 
 		   vpx.vpot, vpy.vpot, vpz.vpot, 
 		   spx.spot, spy.spot, spz.spot, 
-		   fp_imgpot, field.field );
+		   ipot.ipot, field.field );
 
     // this is the linear and constant part of the Hamiltonian
     staticpot.init( g.size() ); 
@@ -509,6 +501,129 @@ namespace toolbox
     }
     return 0;    
   }
+  
+  int winop_spectra( int tag, long n_E, long n_a, double E_0, double E_1, 
+		     C_vecpot &vpx, C_vecpot &vpy, C_vecpot &vpz, 
+		     C_sclpot &spx, C_sclpot &spy, C_sclpot &spz,
+		     C_field &field )
+  {
+    double gamma = 0.5 * ( E_1 - E_0 ) / ( n_E - 1.0 );
+    double d_E = 2.0 * gamma;
+
+    FILE *file_spec = NULL;
+    char cstr_fname_wf[40], cstr_fname_info[40], cstr_fname_spec[40];
+    sprintf( cstr_fname_wf, "./res/wf-%d.dat", tag );
+    sprintf( cstr_fname_info, "./res/info-%d.dat", tag );
+    sprintf( cstr_fname_spec, "./res/spec-%d.dat", tag );
+
+    export_log( file_log_tag, false );
+    fprintf( file_log, "LOG File for Window Operator Spectral Analysis\n\n" );
+    fprintf( file_log, "input wave function file: %s\n", cstr_fname_wf );
+    fprintf( file_log, "input info file:          %s\n", cstr_fname_info );
+    fprintf( file_log, "output spectra file:      %s\n\n", cstr_fname_spec );
+    fprintf( stdout, "LOG File for Window Operator Spectral Analysis\n\n" );
+    fprintf( stdout, "input wave function file: %s\n", cstr_fname_wf );
+    fprintf( stdout, "input info file:          %s\n", cstr_fname_info );
+    fprintf( stdout, "output spectra file:      %s\n", cstr_fname_spec );
+
+    fprintf( file_log, "[E_0, E_1] = [%lf, %lf]\n", E_0, E_1 );
+    fprintf( file_log, "n_energy = %ld, n_angle = %ld\n", n_E, n_a );
+    fprintf( file_log, "gamma = %lf\n", gamma );
+    fprintf( file_log, "dE = %lf\n", 2.0 * gamma );
+    fprintf( stdout, "[E_0, E_1] = [%lf, %lf]\n", E_0, E_1 );
+    fprintf( stdout, "n_energy = %ld\n", n_E );
+    fprintf( stdout, "gamma = %lf\n", gamma );
+    fprintf( stdout, "dE = %lf\n", 2.0 * gamma );
+    
+    if( ( file_spec = fopen( cstr_fname_spec, "w" ) ) == NULL ) {
+      fprintf( stderr, "%s cannot be opened!\n", cstr_fname_spec );
+      exit(-1);
+    }
+    else {
+      fprintf( stdout, "write spectra to %s\n", cstr_fname_spec );
+    }
+    
+    grid g;
+    wavefunction wf;
+    read_wavefunction( g, wf, tag );
+    
+    hamop H;
+    wavefunction staticpot;
+    T_imgpot::none ipot;
+    init_hamilton( g, H, staticpot, vpx, vpy, vpz, spx, spy, spz, field, ipot );
+
+    complex P_total, s;
+    wavefunction wf_lsub, fullchi;
+    double *angle = new double[n_a];
+    complex *P_angle = new complex[n_a];
+    complex *ylm_array = new complex[n_a*g.ngps_y()*g.ngps_y()];
+    for( long i_a = 0; i_a < n_a; i_a ++ ) {
+      angle[i_a] = i_a * M_PI / n_a;
+    }
+
+    long index;
+    wf_lsub.init( g.ngps_y() );
+    fullchi.init( g.ngps_x()*g.ngps_y() );
+
+    // construct coefficient array for spherical harmonics
+    for( long i_l = 0; i_l < g.ngps_y(); i_l ++ ) {
+      for( long i_a = 0; i_a < n_a; i_a ++ ) {
+	index = i_l * ( i_l + 1 ) * n_a + i_a;
+	ylm_array[index] = ylm( i_l, 0, angle[i_a], 0.0 );
+      }
+    }
+
+    fluid V_ee_0;
+    V_ee_0.init( g.ngps_x() );
+
+    double E;
+    int iv = 0;
+    for( long i_E = 0; i_E < n_E; i_E ++ ) {
+      E = E_0 + i_E * d_E;
+
+      // write the current energy to the file
+      fprintf( file_spec, "%.15le ", E );
+
+      // invoke window-operator method to calculate spectra
+      winop_fullchi( fullchi, wf_lsub, &P_total, E, gamma, 
+		     staticpot, V_ee_0, parameters::charge, g, wf, iv );
+
+      fprintf( stdout, "winop: step %ld for energy %lf: total probability P = %le\n", 
+	      i_E, E, real( P_total ) );
+      
+      // write the partial wave spectra to file
+      for( long i_l = 0; i_l < g.ngps_y(); i_l ++ ) {
+	fprintf( file_spec, "%.15le ", real( wf_lsub[i_l] ) );
+      }
+
+      // write the total spectrum to file
+      fprintf( file_spec, "%.15le ", real( P_total ) );
+
+      for( long i_a = 0; i_a < n_a; i_a ++ ) {
+	P_angle[i_a] = complex( 0.0, 0.0 );
+	for( long i_r = 0; i_r < g.ngps_x(); i_r ++ ) {
+	  s = complex( 0.0, 0.0 );
+	  for( long i_l = 0; i_l < g.ngps_y(); i_l ++ ) {
+	    index = g.index( i_r, i_l, 0, 0 );
+	    s += fullchi[index] * ylm_array[i_l*(i_l+1)*n_a+i_a];
+	  }
+	  P_angle[i_a] += ( conj(s) * s );
+	}
+	P_angle[i_a] *= g.delt_x();
+	// write the energy-angle-resolved spectra to file
+	fprintf( file_spec, "%.15le ", real( P_angle[i_a] ) );
+      }
+      fprintf( file_spec, "\n" );
+      fflush( file_spec );
+    }
+    fclose( file_spec );
+    std::cout << std::string( 45, '<' ) << "winop_spectra" << std::endl << std::endl;
+    delete[] angle;
+    delete[] P_angle;
+    delete[] ylm_array;
+    return 0;
+  }
+
 
   void disp_copyright()
   {

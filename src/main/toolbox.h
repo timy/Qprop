@@ -15,6 +15,7 @@
 #include "sp_type.h"
 #include "wf_type.h"
 #include "fd_type.h"
+#include "ip_type.h"
 
 namespace toolbox
 {
@@ -31,7 +32,7 @@ namespace toolbox
   int init_hamilton( grid &g, hamop &hamilton, wavefunction &staticpot,  
 		     C_vecpot &vpx, C_vecpot &vpy, C_vecpot &vpz, 
 		     C_sclpot &spx, C_sclpot &spy, C_sclpot &spz, 
-		     C_field &field );
+		     C_field &field, C_imgpot &ipot );
 
   int export_wf( grid &g, wavefunction &wf, int tag );
 
@@ -52,6 +53,11 @@ namespace toolbox
   int export_vecpot( C_vecpot &vp, long interval, int tag );
   int export_field( C_vecpot &vp, long interval, int tag );
   int export_field( C_field &fd, long interval, int tag );
+
+  int winop_spectra( int tag, long n_E, long n_a, double E_0, double E_1, 
+		     C_vecpot &vpx, C_vecpot &vpy, C_vecpot &vpz, 
+		     C_sclpot &spx, C_sclpot &spy, C_sclpot &spz,
+		     C_field &field );
 
   void disp_copyright();
   void done();

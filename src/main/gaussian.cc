@@ -19,7 +19,8 @@ int main( int argc, char* argv[] )
   T_vecpot::none vpx, vpy, vpz; 
   T_sclpot::none spx, spy, spz;
   T_field::none field;
-  toolbox::init_hamilton( g, H, staticpot, vpx, vpy, vpz, spx, spy, spz, field );
+  T_imgpot::imgpot ipot;
+  toolbox::init_hamilton( g, H, staticpot, vpx, vpy, vpz, spx, spy, spz, field, ipot );
   std::cout << "charge = " << parameters::charge << std::endl;
 
   int me = 0;

@@ -1,13 +1,14 @@
 #include "ip_type.h"
 
-namespace ip_type
+namespace T_imgpot
 {
-  
-  // amplitude of imaginary absorbing potential
-  double  ampl_im = 100.0;
+  double ampl_im = 100.0;
 
-  double ipot(long xindex, long yindex, long zindex, double time, grid g)
-  {
+  double none::ipot_( long xindex, long yindex, long zindex, double time, grid g ) {
+    return 0.0;
+  }
+
+  double imgpot::ipot_( long xindex, long yindex, long zindex, double time, grid g ) {
     double x,y,z;
 
     if (ampl_im>1.0) {
@@ -44,8 +45,6 @@ namespace ip_type
     }
     else {
       return 0.0;
-    };
-    
-  } 
+    };    
+  }
 }
-

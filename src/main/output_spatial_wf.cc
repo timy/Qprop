@@ -11,8 +11,7 @@ int main(int argc, char **argv)
 
   for( int i = 11; i < 211; i ++ ) {
     tag = i;
-    toolboxread_grid_from_file( g, 11 );
-    read_wavefunction_from_file( g, wf, tag );
+    read_wavefunction( g, wf, tag );
     export_spatial_wf( g, wf, tag );
   }
 

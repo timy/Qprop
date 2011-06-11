@@ -1,5 +1,5 @@
 # user defined target name
-TARGET	=	prop
+TARGET	=	spec
 # the source file needed
 OPTSRC	=	parameters.cc toolbox.cc $(TARGET).cc ../../lib/libqprop.a \
 		../../lib/libutil.a

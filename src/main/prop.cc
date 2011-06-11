@@ -30,8 +30,9 @@ int main( int argc, char* argv[] )
   T_sclpot::coulomb spx;
   T_sclpot::none spy, spz;
   T_field::none field;
+  T_imgpot::imgpot ipot;
   toolbox::set_charge( 1.0 );
-  toolbox::init_hamilton( g, H, staticpot, vpx, vpy, vpz, spx, spy, spz, field );
+  toolbox::init_hamilton( g, H, staticpot, vpx, vpy, vpz, spx, spy, spz, field, ipot );
 
   complex time_step = complex( parameters::time_step, 0.0 );
   double time = parameters::t0;
